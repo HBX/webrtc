@@ -88,7 +88,7 @@ var (
 	ErrIncorrectSignalingState = errors.New("operation can not be run in current signaling state")
 
 	// ErrProtocolTooLarge indicates that value given for a DataChannelInit protocol is
-	//longer then 65535 bytes
+	// longer then 65535 bytes
 	ErrProtocolTooLarge = errors.New("protocol is larger then 65535 bytes")
 
 	// ErrSenderNotCreatedByConnection indicates RemoveTrack was called with a RtpSender not created
@@ -125,4 +125,10 @@ var (
 
 	// ErrNoSRTPProtectionProfile indicates that the DTLS handshake completed and no SRTP Protection Profile was chosen
 	ErrNoSRTPProtectionProfile = errors.New("DTLS Handshake completed and no SRTP Protection Profile was chosen")
+
+	// ErrFailedToGenerateCertificateFingerprint indicates that we failed to generate the fingerprint used for comparing certificates
+	ErrFailedToGenerateCertificateFingerprint = errors.New("failed to generate certificate fingerprint")
+
+	errDetachNotEnabled   = errors.New("enable detaching by calling webrtc.DetachDataChannels()")
+	errDetachBeforeOpened = errors.New("datachannel not opened yet, try calling Detach from OnOpen")
 )

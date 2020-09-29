@@ -18,7 +18,6 @@ import (
 	"github.com/pion/logging"
 	"github.com/pion/rtcp"
 	"github.com/pion/sdp/v3"
-
 	"github.com/pion/webrtc/v3/internal/util"
 	"github.com/pion/webrtc/v3/pkg/rtcerr"
 )
@@ -318,7 +317,7 @@ func (pc *PeerConnection) negotiationNeededOp() {
 	}
 }
 
-func (pc *PeerConnection) checkNegotiationNeeded() bool {
+func (pc *PeerConnection) checkNegotiationNeeded() bool { //nolint:gocognit
 	// To check if negotiation is needed for connection, perform the following checks:
 	// Skip 1, 2 steps
 	// Step 3
@@ -378,6 +377,7 @@ func (pc *PeerConnection) checkNegotiationNeeded() bool {
 				if _, ok := m.Attribute(t.Direction().String()); !ok {
 					return true
 				}
+			default:
 			}
 		}
 		// Step 5.4
@@ -457,7 +457,7 @@ func (pc *PeerConnection) OnConnectionStateChange(f func(PeerConnectionState)) {
 }
 
 // SetConfiguration updates the configuration of this PeerConnection object.
-func (pc *PeerConnection) SetConfiguration(configuration Configuration) error {
+func (pc *PeerConnection) SetConfiguration(configuration Configuration) error { //nolint:gocognit
 	// https://www.w3.org/TR/webrtc/#dom-rtcpeerconnection-setconfiguration (step #2)
 	if pc.isClosed.get() {
 		return &rtcerr.InvalidStateError{Err: ErrConnectionClosed}
@@ -560,7 +560,7 @@ func (pc *PeerConnection) hasLocalDescriptionChanged(desc *SessionDescription) b
 
 // CreateOffer starts the PeerConnection and generates the localDescription
 // https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnection-createoffer
-func (pc *PeerConnection) CreateOffer(options *OfferOptions) (SessionDescription, error) {
+func (pc *PeerConnection) CreateOffer(options *OfferOptions) (SessionDescription, error) { //nolint:gocognit
 	useIdentity := pc.idpLoginURL != nil
 	switch {
 	case useIdentity:
@@ -787,7 +787,7 @@ func (pc *PeerConnection) CreateAnswer(options *AnswerOptions) (SessionDescripti
 }
 
 // 4.4.1.6 Set the SessionDescription
-func (pc *PeerConnection) setDescription(sd *SessionDescription, op stateChangeOp) error {
+func (pc *PeerConnection) setDescription(sd *SessionDescription, op stateChangeOp) error { //nolint:gocognit
 	switch {
 	case pc.isClosed.get():
 		return &rtcerr.InvalidStateError{Err: ErrConnectionClosed}
@@ -958,7 +958,7 @@ func (pc *PeerConnection) LocalDescription() *SessionDescription {
 
 // SetRemoteDescription sets the SessionDescription of the remote peer
 // nolint: gocyclo
-func (pc *PeerConnection) SetRemoteDescription(desc SessionDescription) error {
+func (pc *PeerConnection) SetRemoteDescription(desc SessionDescription) error { //nolint:gocognit
 	if pc.isClosed.get() {
 		return &rtcerr.InvalidStateError{Err: ErrConnectionClosed}
 	}
@@ -1126,7 +1126,7 @@ func (pc *PeerConnection) startReceiver(incoming trackDetails, receiver *RTPRece
 }
 
 // startRTPReceivers opens knows inbound SRTP streams from the RemoteDescription
-func (pc *PeerConnection) startRTPReceivers(incomingTracks []trackDetails, currentTransceivers []*RTPTransceiver) {
+func (pc *PeerConnection) startRTPReceivers(incomingTracks []trackDetails, currentTransceivers []*RTPTransceiver) { //nolint:gocognit
 	localTransceivers := append([]*RTPTransceiver{}, currentTransceivers...)
 
 	remoteIsPlanB := false
@@ -1135,6 +1135,8 @@ func (pc *PeerConnection) startRTPReceivers(incomingTracks []trackDetails, curre
 		remoteIsPlanB = true
 	case SDPSemanticsUnifiedPlanWithFallback:
 		remoteIsPlanB = descriptionIsPlanB(pc.RemoteDescription())
+	default:
+		// none
 	}
 
 	// Ensure we haven't already started a transceiver for this ssrc
@@ -1198,7 +1200,6 @@ func (pc *PeerConnection) startRTPReceivers(incomingTracks []trackDetails, curre
 // startRTPSenders starts all outbound RTP streams
 func (pc *PeerConnection) startRTPSenders(currentTransceivers []*RTPTransceiver) {
 	for _, transceiver := range currentTransceivers {
-		// TODO(sgotti) when in future we'll avoid replacing a transceiver sender just check the transceiver negotiation status
 		if transceiver.Sender() != nil && transceiver.Sender().isNegotiated() && !transceiver.Sender().hasSent() {
 			err := transceiver.Sender().Send(RTPSendParameters{
 				Encodings: RTPEncodingParameters{
@@ -1251,7 +1252,7 @@ func (pc *PeerConnection) startSCTP() {
 	pc.sctpTransport.lock.Unlock()
 }
 
-func (pc *PeerConnection) handleUndeclaredSSRC(rtpStream io.Reader, ssrc uint32) error {
+func (pc *PeerConnection) handleUndeclaredSSRC(rtpStream io.Reader, ssrc uint32) error { //nolint:gocognit
 	remoteDescription := pc.RemoteDescription()
 	if remoteDescription == nil {
 		return fmt.Errorf("remote Description has not been set yet")
@@ -2107,7 +2108,7 @@ func (pc *PeerConnection) generateUnmatchedSDP(transceivers []*RTPTransceiver, u
 // generateMatchedSDP generates a SDP and takes the remote state into account
 // this is used everytime we have a RemoteDescription
 // nolint: gocyclo
-func (pc *PeerConnection) generateMatchedSDP(transceivers []*RTPTransceiver, useIdentity bool, includeUnmatched bool, connectionRole sdp.ConnectionRole) (*sdp.SessionDescription, error) {
+func (pc *PeerConnection) generateMatchedSDP(transceivers []*RTPTransceiver, useIdentity bool, includeUnmatched bool, connectionRole sdp.ConnectionRole) (*sdp.SessionDescription, error) { //nolint:gocognit
 	d, err := sdp.NewJSEPSessionDescription(useIdentity)
 	if err != nil {
 		return nil, err
